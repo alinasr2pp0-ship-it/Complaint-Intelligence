@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+
+body {
+  background-color: #EFEAE0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(31,42,46,0.025) 0px, rgba(31,42,46,0.025) 1px, transparent 1px, transparent 28px);
+}
+
+::selection { background: #2F6F6B; color: #EFEAE0; }
+
+.scrollbar-thin::-webkit-scrollbar { width: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #C9B48A; border-radius: 3px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
