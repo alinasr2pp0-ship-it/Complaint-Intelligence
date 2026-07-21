@@ -28,9 +28,18 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"  # development | production
     LOG_LEVEL: str = "INFO"
 
-    # --- Google Gemini (generation model) ---
-    GOOGLE_API_KEY: Optional[str] = None
-    GEMINI_MODEL: str = "gemini-3.1-flash-lite"
+    # --- OpenRouter (sole generation provider -- free-tier model chain) ---
+    OPENROUTER_API_KEY: Optional[str] = None
+    OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1/chat/completions"
+    OPENROUTER_PRIMARY_MODEL: str = "meta-llama/llama-3.2-3b-instruct:free"
+    OPENROUTER_FALLBACK_MODELS: str = "mistralai/mistral-small-2506,deepseek/deepseek-chat,google/gemma-3-4b-it:free"
+
+    @property
+    def openrouter_models_list(self) -> list[str]:
+        """Ordered chain tried in turn: primary, then each fallback."""
+        chain = [self.OPENROUTER_PRIMARY_MODEL]
+        chain += [m.strip() for m in self.OPENROUTER_FALLBACK_MODELS.split(",") if m.strip()]
+        return chain
 
     # --- Embeddings (Voyage AI -- hosted API, no local model download) ---
     VOYAGE_API_KEY: Optional[str] = None
