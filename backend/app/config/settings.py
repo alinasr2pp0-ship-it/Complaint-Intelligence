@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     VOYAGE_BATCH_SIZE: int = 128  # Voyage API accepts up to 128 texts per embed call
 
     # --- Data path ---
-    DATA_CSV_PATH: str = str(PROJECT_ROOT / "data" / "processed_corpus_5000.csv")
+    DATA_CSV_PATH: str = str(BACKEND_DIR / "data" / "processed_corpus_5000.csv")
 
     # --- Pinecone (vector store) ---
     PINECONE_API_KEY: Optional[str] = None

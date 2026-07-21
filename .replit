@@ -13,7 +13,6 @@ expertMode = true
 CORS_ORIGINS = "*"
 EMBEDDING_DIMENSION = "1024"
 EMBEDDING_MODEL = "voyage-3"
-ENVIRONMENT = "development"
 LOG_LEVEL = "INFO"
 PINECONE_CLOUD = "aws"
 PINECONE_INDEX_NAME = "complaints-rag"
@@ -25,7 +24,12 @@ RETRIEVER_TOP_K = "3"
 VOYAGE_BATCH_SIZE = "128"
 OPENROUTER_FALLBACK_MODELS = "mistralai/mistral-small-2506,deepseek/deepseek-chat,google/gemma-3-4b-it:free"
 OPENROUTER_PRIMARY_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
-DATA_CSV_PATH = "/home/runner/workspace/backend/data/processed_corpus_5000.csv"
+
+[userenv.production]
+ENVIRONMENT = "production"
+
+[userenv.development]
+ENVIRONMENT = "development"
 
 [workflows]
 runButton = "Project"
