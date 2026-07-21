@@ -27,3 +27,12 @@ pandas==2.2.3
 nltk==3.9.1
 rouge-score==0.1.2
 tabulate==0.9.0
+langchain
+langchain-pinecone
+langchain-text-splitters
+langchain-voyageai
+nltk
+pinecone
+rouge-score
+tabulate
+voyageai

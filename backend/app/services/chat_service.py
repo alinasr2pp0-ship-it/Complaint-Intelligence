@@ -2,7 +2,7 @@
 from typing import Optional
 
 from app.core.logging_config import get_logger
-from app.rag.chain import direct_gemini_call
+from app.rag.chain import generate_answer_from_context
 from app.rag.prompts import format_docs
 from app.schemas.chat import ChatResponse, SourceDocument
 from app.vector_store.store import get_retriever
@@ -15,7 +15,7 @@ def ask_question(question: str, k: Optional[int] = None) -> ChatResponse:
     retriever = get_retriever(k=k)
     docs = retriever.invoke(question)
     context = format_docs(docs)
-    answer = direct_gemini_call({"context": context, "question": question})
+    answer = generate_answer_from_context({"context": context, "question": question})
 
     sources = [
         SourceDocument(
