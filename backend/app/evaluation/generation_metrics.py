@@ -37,7 +37,9 @@ def calculate_metrics(bot_ans: str, ground_truth: str) -> Tuple[float, float, fl
     return round(r1, 3), round(rl, 3), round(bleu, 3)
 
 
-def run_generation_evaluation(retriever, client, gemini_model: str, eval_dataset=None) -> "pd.DataFrame":
+def run_generation_evaluation(retriever, eval_dataset=None) -> "pd.DataFrame":
+    """Generation now runs through the OpenRouter model chain (see app.rag.chain)."""
+    from app.rag.chain import generate_completion
     from app.rag.prompts import get_prompt
 
     eval_dataset = eval_dataset or EVAL_DATASET
@@ -48,8 +50,8 @@ def run_generation_evaluation(retriever, client, gemini_model: str, eval_dataset
         docs = retriever.invoke(q)
         context = "\n\n".join(doc.page_content for doc in docs)
         full_prompt = get_prompt(context, q, version="v1")
-        response = client.models.generate_content(model=gemini_model, contents=full_prompt)
+        answer_text = generate_completion(full_prompt)
         latency = round(time.time() - start_time, 2)
-        r1, rl, bleu = calculate_metrics(response.text, gt)
+        r1, rl, bleu = calculate_metrics(answer_text, gt)
         results_list.append({"Q": idx, "Latency(s)": latency, "ROUGE-1": r1, "ROUGE-L": rl, "BLEU": bleu})
     return pd.DataFrame(results_list)
