@@ -1,19 +1,28 @@
-from typing import List
+"""Chat service -- wraps the RAG chain for the /api/v1/chat endpoint."""
+from typing import Optional
 
-from pydantic import BaseModel, Field
+from app.core.logging_config import get_logger
+from app.rag.chain import generate_answer_from_context
+from app.rag.prompts import format_docs
+from app.schemas.chat import ChatResponse, SourceDocument
+from app.vector_store.store import get_retriever
 
-
-class ChatRequest(BaseModel):
-    question: str = Field(..., min_length=1, description="User's question about the complaints corpus.")
-
-
-class SourceDocument(BaseModel):
-    complaint_id: str
-    company: str
-    snippet: str
+logger = get_logger(__name__)
 
 
-class ChatResponse(BaseModel):
-    answer: str
-    question: str
-    sources: List[SourceDocument] = Field(default_factory=list)
+def ask_question(question: str, k: Optional[int] = None) -> ChatResponse:
+    """Retrieve -> format -> generate, surfacing sources for the UI's context viewer."""
+    retriever = get_retriever(k=k)
+    docs = retriever.invoke(question)
+    context = format_docs(docs)
+    answer = generate_answer_from_context({"context": context, "question": question})
+
+    sources = [
+        SourceDocument(
+            complaint_id=d.metadata.get("complaint_id", "unknown"),
+            company=d.metadata.get("company", "unknown"),
+            snippet=(d.page_content[:300] + "...") if len(d.page_content) > 300 else d.page_content,
+        )
+        for d in docs
+    ]
+    return ChatResponse(answer=answer, question=question, sources=sources)
