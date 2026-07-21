@@ -68,3 +68,8 @@ externalPort = 5173
 [[ports]]
 localPort = 8000
 externalPort = 80
+
+[deployment]
+deploymentTarget = "autoscale"
+run = ["bash", "-c", "cd backend && gunicorn --bind=0.0.0.0:8000 --workers=2 app.main:app -k uvicorn.workers.UvicornWorker"]
+build = ["bash", "-c", "cd frontend && npm install && npm run build"]
