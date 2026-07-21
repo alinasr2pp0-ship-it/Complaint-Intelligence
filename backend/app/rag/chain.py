@@ -1,45 +1,91 @@
-"""RAG chain: Pinecone retriever -> prompt -> Gemini generation."""
-from functools import lru_cache
+"""
+RAG chain: Pinecone retriever -> prompt -> generation.
 
-from google import genai
+Generation is entirely via OpenRouter's free-tier models (no Gemini, no
+paid provider). A fixed model chain is tried in order until one succeeds:
+
+    PRIMARY_MODEL   = "meta-llama/llama-3.2-3b-instruct:free"
+    FALLBACK_MODELS = ["mistralai/mistral-small-2506",
+                        "deepseek/deepseek-chat",
+                        "google/gemma-3-4b-it:free"]
+"""
+import httpx
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 
 from app.config.settings import get_settings
-from app.core.exceptions import ConfigurationError
+from app.core.exceptions import ConfigurationError, GenerationError
 from app.core.logging_config import get_logger
 from app.rag.prompts import build_default_prompt, format_docs
 from app.vector_store.store import get_retriever
 
 logger = get_logger(__name__)
 
+PRIMARY_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
+FALLBACK_MODELS = [
+    "mistralai/mistral-small-2506",
+    "deepseek/deepseek-chat",
+    "google/gemma-3-4b-it:free",
+]
+MODEL_CHAIN = [PRIMARY_MODEL, *FALLBACK_MODELS]
 
-@lru_cache
-def get_gemini_client() -> genai.Client:
+
+def _call_openrouter(full_prompt: str, model: str) -> str:
     settings = get_settings()
-    if not settings.GOOGLE_API_KEY:
-        raise ConfigurationError("GOOGLE_API_KEY is not set. Add it to your environment or .env file.")
-    return genai.Client(api_key=settings.GOOGLE_API_KEY)
+    if not settings.OPENROUTER_API_KEY:
+        raise ConfigurationError("OPENROUTER_API_KEY is not set. Add it to your environment or .env file.")
+
+    response = httpx.post(
+        settings.OPENROUTER_BASE_URL,
+        headers={
+            "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": model,
+            "messages": [{"role": "user", "content": full_prompt}],
+        },
+        timeout=30.0,
+    )
+    response.raise_for_status()
+    data = response.json()
+    return data["choices"][0]["message"]["content"]
 
 
-def direct_gemini_call(input_dict: dict) -> str:
-    settings = get_settings()
+def generate_completion(full_prompt: str) -> str:
+    """Walks MODEL_CHAIN in order, returning the first successful response."""
+    last_error = None
+    for model in MODEL_CHAIN:
+        try:
+            answer = _call_openrouter(full_prompt, model)
+            logger.info("Answered via OpenRouter model '%s'.", model)
+            return answer
+        except Exception as e:  # noqa: BLE001 -- try the next model in the chain
+            logger.warning("OpenRouter model '%s' failed (%s); trying next.", model, e)
+            last_error = e
+
+    logger.error("All OpenRouter models in the chain failed.")
+    raise GenerationError(f"All OpenRouter models failed. Last error: {last_error}")
+
+
+def generate_answer_from_context(input_dict: dict) -> str:
+    """
+    Generation entry point used by the RAG chain and the qualitative-eval
+    generation itself runs entirely through the OpenRouter chain above.
+    """
     context = input_dict["context"]
     question = input_dict["question"]
     full_prompt = build_default_prompt(context, question)
     try:
-        client = get_gemini_client()
-        response = client.models.generate_content(model=settings.GEMINI_MODEL, contents=full_prompt)
-        return response.text
-    except Exception as e:  # noqa: BLE001 -- keep the chatbot resilient to upstream failures
-        logger.exception("Gemini generation failed")
-        return f"Error calling Gemini: {str(e)}"
+        return generate_completion(full_prompt)
+    except GenerationError as e:
+        return f"Error: {e.message}"
 
 
 def build_rag_chain():
     retriever = get_retriever()
     rag_chain = (
         {"context": retriever | format_docs, "question": RunnablePassthrough()}
-        | RunnableLambda(direct_gemini_call)
+        | RunnableLambda(generate_answer_from_context)
     )
     return rag_chain
 
