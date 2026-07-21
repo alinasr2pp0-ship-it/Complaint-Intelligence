@@ -8,8 +8,9 @@ class HealthResponse(BaseModel):
     pinecone_index: str
     embedding_model: str
     embedding_backend: str
-    gemini_model: str
-    google_api_key_configured: bool
+    generation_backend: str
+    generation_model_chain: list[str]
+    openrouter_api_key_configured: bool
     pinecone_api_key_configured: bool
     voyage_api_key_configured: bool
     version: str
