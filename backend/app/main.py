@@ -12,7 +12,7 @@ from app.config.settings import get_settings
 from app.core.exceptions import AppException, app_exception_handler, unhandled_exception_handler
 from app.core.logging_config import configure_logging, get_logger
 
-FRONTEND_DIST = Path(__file__).resolve().parents[2].parent / "frontend" / "dist"
+FRONTEND_DIST = Path(__file__).resolve().parents[2] / "frontend" / "dist"
 
 configure_logging()
 logger = get_logger(__name__)
