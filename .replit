@@ -22,8 +22,8 @@ PINECONE_REGION = "us-east-1"
 RETRIEVER_SEARCH_TYPE = "similarity"
 RETRIEVER_TOP_K = "3"
 VOYAGE_BATCH_SIZE = "128"
-OPENROUTER_FALLBACK_MODELS = "mistralai/mistral-small-2506,deepseek/deepseek-chat,google/gemma-3-4b-it:free"
-OPENROUTER_PRIMARY_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
+OPENROUTER_FALLBACK_MODELS = "nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-26b-a4b-it:free,nvidia/nemotron-nano-9b-v2:free"
+OPENROUTER_PRIMARY_MODEL = "openai/gpt-oss-20b:free"
 
 [userenv.production]
 ENVIRONMENT = "production"

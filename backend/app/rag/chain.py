@@ -20,11 +20,11 @@ from app.vector_store.store import get_retriever
 
 logger = get_logger(__name__)
 
-PRIMARY_MODEL = "meta-llama/llama-3.2-3b-instruct:free"
+PRIMARY_MODEL = "openai/gpt-oss-20b:free"
 FALLBACK_MODELS = [
-    "mistralai/mistral-small-2506",
-    "deepseek/deepseek-chat",
-    "google/gemma-3-4b-it:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "nvidia/nemotron-nano-9b-v2:free",
 ]
 MODEL_CHAIN = [PRIMARY_MODEL, *FALLBACK_MODELS]
 
