@@ -1,13 +1,3 @@
-"""
-Standalone evaluation entry point -- runs qualitative + generation + retrieval
-evaluation independently of the API, producing:
-    evaluation_report.txt
-    metrics_report.csv
-    retrieval_evaluation_report.csv
-
-Usage:
-    python -m app.evaluation.run_all
-"""
 from app.core.logging_config import configure_logging, get_logger
 from app.evaluation.generation_metrics import EVAL_DATASET, run_generation_evaluation
 from app.evaluation.retrieval_metrics import run_retrieval_evaluation
