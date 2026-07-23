@@ -1,12 +1,3 @@
-"""
-Application configuration.
-
-All values are sourced from environment variables so the exact same codebase
-runs unmodified locally, in Docker, or on Replit / any cloud host. Both the
-vector store (Pinecone) and the embedding model (Voyage AI) are hosted
-services -- nothing is downloaded or run locally, so ingestion and serving
-work the same on a resource-constrained container as on a laptop.
-"""
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
