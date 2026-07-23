@@ -1,9 +1,3 @@
-"""
-Retrieval-quality evaluation (Recall@K, MRR against programmatically-derived
-ground truth). Works against the Pinecone-backed retriever unchanged, since
-`PineconeVectorStore.similarity_search` implements the same interface used
-here.
-"""
 from typing import Dict, List, Set
 
 import pandas as pd
