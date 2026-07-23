@@ -1,11 +1,3 @@
-"""
-Standalone optimization entry point -- runs all four experiments (prompt,
-embedding model, chunk size/overlap, retrieval strategy) and writes
-`optimization_experiments_report.md`. Independent of the API.
-
-Usage:
-    python -m app.optimization.run_optimization
-"""
 from app.core.logging_config import configure_logging, get_logger
 from app.evaluation.generation_metrics import EVAL_DATASET
 from app.evaluation.retrieval_metrics import TEST_QUERIES, build_ground_truth_ids, run_retrieval_evaluation
